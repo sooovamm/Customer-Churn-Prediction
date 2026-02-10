@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/dell/OneDrive/Desktop/mlops/mlruns/1/models/m-fd4ed2d1e2bd4d30ba36a5d8d5e70736/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.9.0
+model_id: m-fd4ed2d1e2bd4d30ba36a5d8d5e70736
+model_size_bytes: 857
+model_uuid: m-fd4ed2d1e2bd4d30ba36a5d8d5e70736
+prompts: null
+run_id: 002567918ca448f6910d7fb38201f904
+utc_time_created: '2026-02-10 09:34:35.940261'
