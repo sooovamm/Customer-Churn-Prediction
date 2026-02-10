@@ -1,0 +1,1 @@
+An end-to-end MLOps pipeline that predicts customer churn using Machine Learning, exposes a REST API with FastAPI, logs experiments with MLflow, and stores predictions in MySQL — all fully containerized using Docker.
