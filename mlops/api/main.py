@@ -123,3 +123,4 @@ def predict(data: CustomerData):
     except Exception as e:
         print("FULL ERROR:", str(e))
         return {"error": str(e)}
+
