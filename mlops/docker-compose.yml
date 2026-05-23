@@ -1,0 +1,84 @@
+
+
+
+services:
+
+  
+  mysql:
+    image: mysql:8.3
+    container_name: mlops-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE:      mlops
+      MYSQL_ROOT_HOST:     "%"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+ 
+  mlflow:
+
+    image: ghcr.io/mlflow/mlflow:v2.22.0
+    container_name: mlflow-server
+    restart: unless-stopped
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./mlflow.db:/mlflow/mlflow.db
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/mlruns
+      --host 0.0.0.0
+      --port 5000
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: churn-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy   
+      mlflow:
+        condition: service_healthy
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MODEL_URI:           ${MODEL_URI:-models:/ChurnPredictionModel@production}
+      SCALER_PATH:         /app/model/scaler.pkl
+      DB_HOST:             mlops-mysql
+      DB_USER:             root
+      DB_PASSWORD:         root
+      DB_NAME:             mlops
+      DB_PORT:             3306
+    volumes:
+      # Mount model artifacts so you can update the scaler without rebuilding
+      - ./model:/app/model:ro
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+
+volumes:
+  mysql_data:
